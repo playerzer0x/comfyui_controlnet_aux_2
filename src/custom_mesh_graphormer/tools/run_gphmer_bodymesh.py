@@ -649,8 +649,15 @@ def main(args):
         # init three transformer-encoder blocks in a loop
         for i in range(len(output_feat_dim)):
             config_class, model_class = BertConfig, Graphormer
-            config = config_class.from_pretrained(args.config_name if args.config_name \
-                    else args.model_name_or_path)
+            try:
+                config = config_class.from_pretrained(args.config_name if args.config_name \
+                        else args.model_name_or_path, attn_implementation='eager')
+            except TypeError:
+                # Fallback for older transformers versions that don't support attn_implementation
+                config = config_class.from_pretrained(args.config_name if args.config_name \
+                        else args.model_name_or_path)
+                if hasattr(config, 'attn_implementation'):
+                    config.attn_implementation = 'eager'
 
             config.output_attentions = False
             config.hidden_dropout_prob = args.drop_out
