@@ -11,7 +11,18 @@ from .e2e_hand_network import Graphormer_Hand_Network
 
 CONFIG_NAME = "config.json"
 
-from .modeling_utils import (WEIGHTS_NAME, TF_WEIGHTS_NAME,
-                          PretrainedConfig, PreTrainedModel, prune_layer, Conv1D)
+from .modeling_utils import (
+    WEIGHTS_NAME,
+    TF_WEIGHTS_NAME,
+    PretrainedConfig,
+    PreTrainedModel,
+    Conv1D,
+)
+
+# Ensure compatibility across different function names
+try:
+    from .modeling_utils import prune_layer  # type: ignore
+except Exception:  # ImportError or AttributeError
+    from .modeling_utils import prune_linear_layer as prune_layer  # type: ignore
 
 from .file_utils import (PYTORCH_PRETRAINED_BERT_CACHE)
