@@ -1,7 +1,37 @@
 from transformers.modeling_utils import *
-from transformers.pytorch_utils import Conv1D
 import torch
 import torch.nn as nn
+
+# Try multiple import locations for Conv1D to handle different transformers versions
+try:
+    from transformers.pytorch_utils import Conv1D
+except ImportError:
+    try:
+        from transformers.modeling_utils import Conv1D
+    except ImportError:
+        try:
+            from transformers import Conv1D
+        except ImportError:
+            # Fallback: define Conv1D if it's not available
+            import torch.nn as nn
+            class Conv1D(nn.Module):
+                """
+                1D-convolutional layer as defined by Radford et al. for OpenAI GPT (and also used in GPT-2).
+                Basically works like a linear layer but the weights are transposed.
+                """
+                def __init__(self, nf, nx):
+                    super().__init__()
+                    self.nf = nf
+                    w = torch.empty(nx, nf)
+                    nn.init.normal_(w, std=0.02)
+                    self.weight = nn.Parameter(w)
+                    self.bias = nn.Parameter(torch.zeros(nf))
+
+                def forward(self, x):
+                    size_out = x.size()[:-1] + (self.nf,)
+                    x = torch.addmm(self.bias, x.view(-1, x.size(-1)), self.weight)
+                    x = x.view(*size_out)
+                    return x
 
 
 def prune_linear_layer(layer, index, dim=0):
