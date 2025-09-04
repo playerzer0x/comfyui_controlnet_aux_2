@@ -38,3 +38,6 @@ def prune_linear_layer(layer, index, dim=0):
         new_layer.bias.data = b.contiguous()
     
     return new_layer
+
+# Backwards compatibility alias: older code imports `prune_layer`
+prune_layer = prune_linear_layer
