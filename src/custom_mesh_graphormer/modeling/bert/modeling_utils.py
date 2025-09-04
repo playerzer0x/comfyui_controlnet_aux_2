@@ -1,4 +1,5 @@
 from transformers.modeling_utils import *
+from transformers.pytorch_utils import Conv1D
 import torch
 import torch.nn as nn
 
